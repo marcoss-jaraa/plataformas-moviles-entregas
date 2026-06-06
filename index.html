@@ -1,275 +1,400 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataformas Móviles - Trabajos Prácticos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-principal: #0d1310; /* Verde/Negro muy oscuro profundo */
-            --bg-card: #141e19;      /* Verde oscuro para las tarjetas */
-            --dorado: #d4af37;       /* Dorado Trifuerza */
-            --dorado-brillo: #f3e5ab;/* Dorado claro para hovers */
-            --texto-muted: #8ea89d;  /* Texto secundario verdoso */
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Plataformas Móviles — Hyrule Map Index</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
+<style>
+/* ─── RESET & FONT ─── */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Press Start 2P',monospace;background:#050806;overflow-x:hidden;}
 
-        body {
-            background-color: var(--bg-principal);
-            color: #f8f9fa;
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+/* ─── MAP FRAME (Zelda-style golden/brown border) ─── */
+.nes-frame{
+  max-width:950px;margin:20px auto;padding:12px;
+  background:#000;
+}
+.nes-inner{
+  border:4px solid #d4af37;
+  background:#1b241e;
+  padding:4px;
+  box-shadow:0 0 0 4px #000, 0 0 0 8px #8a6f1c;
+  image-rendering:pixelated;
+}
 
-        .zelda-title {
-            font-family: 'Cinzel', serif;
-            color: var(--dorado);
-            letter-spacing: 2px;
-            text-shadow: 0px 0px 10px rgba(212, 175, 55, 0.3);
-        }
+/* ─── WORLD MAP CANVAS ─── */
+.world-map{
+  position:relative;
+  width:100%;
+  background:#dfb76c; /* Base arenosa/pergamino */
+  overflow:hidden;
+  min-height:580px;
+}
 
-        .triforce-icon {
-            fill: var(--dorado);
-            width: 40px;
-            height: 40px;
-            margin-bottom: 15px;
-            transition: transform 0.3s ease;
-        }
+/* ─── ZONE PANELS ─── */
+.zone{
+  position:absolute;
+  border:2px solid rgba(0,0,0,0.2);
+}
 
-        header:hover .triforce-icon {
-            transform: rotate(180deg);
-        }
+/* ─── STAGE NODES ─── */
+.stage{
+  position:absolute;
+  z-index:10;
+  cursor:pointer;
+  text-decoration:none;
+  display:flex;flex-direction:column;align-items:center;
+  width:85px;
+  transform:translate(-50%,-50%);
+}
+.stage-circle{
+  width:52px;height:52px;
+  border-radius:50%;
+  border:3px solid #000;
+  background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  box-shadow:2px 3px 0 #000;
+  transition:transform .12s, box-shadow .12s;
+  position:relative;
+}
+.stage:hover .stage-circle{
+  transform:translateY(-5px) scale(1.1);
+  box-shadow:2px 8px 0 #000;
+}
+.stage-num{
+  font-size:6px;color:#fff;
+  background:#d4af37;border:2px solid #000;
+  padding:2px 4px;border-radius:1px;
+  margin-top:4px;box-shadow:1px 1px 0 #000;
+  white-space:nowrap;
+}
+.stage-name{
+  font-size:5px;
+  background:rgba(0,0,0,.85);
+  color: #fff;
+  border:1px solid #d4af37;
+  padding:2px 4px;
+  border-radius:1px;
+  margin-top:3px;
+  text-align:center;
+  max-width:90px;
+  line-height:1.4;
+}
+.stage-tag{
+  font-size:6px;padding:1px 3px;border:1px solid;border-radius:1px;margin-top:2px;
+}
+.tag-html {color:#000; border-color:#000; background:#ff9f43;}
+.tag-css  {color:#000; border-color:#000; background:#54a0ff;}
+.tag-js   {color:#000; border-color:#000; background:#feca57;}
+.tag-boot {color:#000; border-color:#000; background:#a55eed;}
+.tag-php  {color:#000; border-color:#000; background:#ff6b6b;}
 
-        /* Estilos de las Tarjetas de Trabajos */
-        .tp-card {
-            background-color: var(--bg-card);
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            text-decoration: none;
-            color: inherit;
-        }
+/* ─── SPRITE SVGS ─── */
+.stage-circle svg{image-rendering:pixelated;width:42px;height:42px;}
 
-        .tp-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--dorado);
-            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.1);
-            color: inherit;
-        }
+/* ─── DECORATIVE TILES ─── */
+.deco{position:absolute;z-index:3;pointer-events:none;font-size:0;}
+.deco svg{image-rendering:pixelated;}
 
-        .tp-number {
-            font-family: 'Cinzel', serif;
-            color: var(--dorado);
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
+/* ─── HUD BAR ─── */
+.hud-bar{
+  background:#000;color:#fff;
+  display:flex;align-items:center;gap:1rem;
+  padding:10px;font-size:7px;letter-spacing:1px;
+  border-top:3px solid #d4af37;
+}
+.hud-bar span{color:#d4af37;}
+.hud-bar .text-white{color:#fff;}
 
-        .tp-card:hover .tp-number {
-            color: var(--dorado-brillo);
-            text-shadow: 0 0 8px var(--dorado);
-        }
+/* ─── LOADING OVERLAY ─── */
+#loading-overlay{
+  position:fixed;inset:0;
+  background:#000;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
+  transition: opacity 0.4s ease;
+}
+.lo-title{font-size:10px;color:#d4af37;letter-spacing:3px;}
+.lo-game{font-size:14px;color:#fff;letter-spacing:2px;animation:blink 1s step-end infinite;}
 
-        .badge-quest {
-            background-color: rgba(212, 175, 55, 0.1);
-            color: var(--dorado);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-        }
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 
-        footer {
-            margin-top: auto;
-            border-top: 1px solid rgba(212, 175, 55, 0.1);
-            background-color: #080c0a;
-        }
-    </style>
+/* ─── REGIONES DE HYRULE (GRADIENTS) ─── */
+.zone-woods{background: linear-gradient(135deg, #1b4d22 0%, #226f34 100%);}
+.zone-mountain{background: linear-gradient(135deg, #78281f 0%, #b03a2e 100%);}
+.zone-castle{background: linear-gradient(135deg, #2e4053 0%, #566573 100%);}
+.zone-desert{background: linear-gradient(135deg, #ca9b52 0%, #e5c185 100%);}
+.zone-domain{background: linear-gradient(135deg, #114b79 0%, #2980b9 100%);}
+.zone-necluda{background: linear-gradient(135deg, #515a5a 0%, #7e5109 100%);}
+</style>
 </head>
 <body>
 
-    <header class="text-center py-5 container">
-        <svg class="triforce-icon" viewBox="0 0 24 24">
-            <path d="M12,2L1,21H23L12,2M12,6L18.5,17H5.5L12,6M12,12L8.75,17H15.25L12,12Z"/>
-        </svg>
-        <h1 class="zelda-title fw-bold display-4">PLATAFORMAS MÓVILES</h1>
-        <p class="text-muted mx-auto col-md-8 style-italic" style="color: var(--texto-muted) !important;">
-            — Bitácora de misiones y desarrollos prácticos del semestre —
-        </p>
-    </header>
+<div id="loading-overlay">
+  <div class="lo-title">ENTERING HYRULE</div>
+  <div class="lo-game">THE LEGEND OF ZELDA</div>
+  <div style="color:#d4af37; font-size:8px;">LOADING QUEST LOG...</div>
+</div>
 
-    <main class="container mb-5">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            
-            <div class="col">
-                <a href="tp-1/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 01</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 1</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+<div class="nes-frame">
+<div class="nes-inner">
 
-            <div class="col">
-                <a href="tp-2/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 02</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 2</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+<div class="world-map" id="wmap" style="height:580px;">
 
-            <div class="col">
-                <a href="tp-3/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 03</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 3</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+  <div class="zone zone-woods" style="left:0;top:0;width:35%;height:38%;"></div>
+  <div class="zone zone-mountain" style="left:34%;top:0;width:66%;height:30%;"></div>
+  <div class="zone zone-castle" style="left:34%;top:29%;width:36%;height:36%;"></div>
+  <div class="zone zone-desert" style="left:0;top:37%;width:35%;height:63%;"></div>
+  <div class="zone zone-domain" style="left:69%;top:29%;width:31%;height:41%;"></div>
+  <div class="zone zone-necluda" style="left:34%;top:64%;width:66%;height:36%;"></div>
 
-            <div class="col">
-                <a href="tp-4/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 04</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 4</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+  <div id="decos"></div>
 
-            <div class="col">
-                <a href="tp-5/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 05</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 5</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+  <svg id="path-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible;" xmlns="http://www.w3.org/2000/svg"></svg>
 
-            <div class="col">
-                <a href="tp-6/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 06</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 6</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+  <div id="stages-container" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>
 
-            <div class="col">
-                <a href="tp-7/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 07</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 7</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+</div>
 
-            <div class="col">
-                <a href="tp-8/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 08</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 8</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+<div class="hud-bar">
+  <span>QUEST LOG</span>
+  <span id="hud-stage" class="text-white">▶ SELECCIONA UNA MISIÓN</span>
+  <span style="margin-left:auto">LINK.START</span>
+</div>
 
-            <div class="col">
-                <a href="tp-9/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 09</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 9</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+</div>
+</div>
 
-            <div class="col">
-                <a href="tp-10/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 10</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 10</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+<script>
+/* ════════════════════════════════════════════════
+   PIXEL ART SVGS (ZELDA STYLE 14x14)
+════════════════════════════════════════════════ */
 
-            <div class="col">
-                <a href="tp-11/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 11</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 11</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+// Link Clásico (Verde)
+const linkVerdeSvg = `<svg viewBox="0 0 14 14" class="link-anim">
+<rect x="4" y="0" width="6" height="3" fill="#228b22"/>
+<rect x="3" y="1" width="8" height="1" fill="#228b22"/>
+<rect x="3" y="3" width="7" height="3" fill="#ffdbac"/>
+<rect x="4" y="4" width="1" height="1" fill="#000"/><rect x="8" y="4" width="1" height="1" fill="#000"/>
+<rect x="3" y="2" width="8" height="1" fill="#ffcc00"/>
+<rect x="3" y="6" width="8" height="4" fill="#228b22"/>
+<rect x="3" y="7" width="8" height="1" fill="#8b5a2b"/>
+<rect x="2" y="7" width="1" height="2" fill="#ffdbac"/><rect x="11" y="7" width="1" height="2" fill="#ffdbac"/>
+<rect x="4" y="10" width="2" height="3" fill="#8b5a2b"/><rect x="8" y="10" width="2" height="3" fill="#8b5a2b"/>
+</svg>`;
 
-            <div class="col">
-                <a href="tp-12/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 12</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 12</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+// Link Azul (Zora armor)
+const linkAzulSvg = linkVerdeSvg.replace(/#228b22/g, '#2980b9');
 
-            <div class="col">
-                <a href="tp-13/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 13</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 13</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+// Link Rojo (Goron armor)
+const linkRojoSvg = linkVerdeSvg.replace(/#228b22/g, '#c0392b');
 
-            <div class="col">
-                <a href="tp-14/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 14</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 14</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+// Princesa Zelda
+const zeldaSvg = `<svg viewBox="0 0 14 14" class="zelda-anim">
+<rect x="4" y="0" width="6" height="3" fill="#ffcc00"/>
+<rect x="3" y="3" width="8" height="3" fill="#ffdbac"/>
+<rect x="4" y="4" width="1" height="1" fill="#4a90e2"/><rect x="8" y="4" width="1" height="1" fill="#4a90e2"/>
+<rect x="3" y="6" width="8" height="2" fill="#ffffff"/>
+<rect x="2" y="8" width="10" height="5" fill="#e84393"/>
+<rect x="5" y="8" width="4" height="5" fill="#ffffff"/>
+<rect x="5" y="9" width="4" height="1" fill="#d4af37"/>
+</svg>`;
 
-            <div class="col">
-                <a href="tp-15/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 15</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 15</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+// Kolog (Korok)
+const korokSvg = `<svg viewBox="0 0 14 14" class="korok-anim">
+<rect x="4" y="2" width="6" height="8" fill="#8b5a2b"/>
+<rect x="2" y="3" width="10" height="5" fill="#27ae60"/>
+<rect x="3" y="2" width="2" height="2" fill="#26ade4"/>
+<rect x="5" y="5" width="1" height="1" fill="#000"/><rect x="8" y="5" width="1" height="1" fill="#000"/>
+<rect x="6" y="7" width="2" height="1" fill="#111"/>
+<rect x="3" y="10" width="2" height="2" fill="#5c3a21"/><rect x="9" y="10" width="2" height="2" fill="#5c3a21"/>
+</svg>`;
 
-            <div class="col">
-                <a href="tp-16/" class="card h-100 tp-card rounded-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge badge-quest">MISIÓN 16</span>
-                    </div>
-                    <h5 class="tp-number mb-1">Trabajo Práctico 16</h5>
-                    <p class="small mb-0 text-secondary" style="color: var(--texto-muted) !important;">Acceder al entregable.</p>
-                </a>
-            </div>
+// Bokoblin
+const bokoblinSvg = `<svg viewBox="0 0 14 14" class="boko-anim">
+<rect x="3" y="1" width="8" height="5" fill="#e74c3c"/>
+<rect x="2" y="0" width="2" height="2" fill="#fff"/><rect x="10" y="0" width="2" height="2" fill="#fff"/>
+<rect x="4" y="3" width="1" height="1" fill="#fff"/><rect x="9" y="3" width="1" height="1" fill="#fff"/>
+<rect x="4" y="5" width="6" height="2" fill="#f1c40f"/>
+<rect x="3" y="7" width="8" height="4" fill="#34495e"/>
+<rect x="4" y="11" width="2" height="2" fill="#e74c3c"/><rect x="8" y="11" width="2" height="2" fill="#e74c3c"/>
+</svg>`;
 
-        </div>
-    </main>
 
-    <footer class="text-center py-3 text-muted small">
-        <div class="container">
-            <span>"It's dangerous to go alone! Take this." — Desarrollado para Plataformas Móviles (2026).</span>
-        </div>
-    </footer>
+/* ═══════════════════════════════════════════
+   DECORACIONES ELEMENTALES (RUPIAS, ARBUSTOS)
+═══════════════════════════════════════════ */
+function shrubSvg() {
+  return `<svg viewBox="0 0 16 16" width="20" height="20"><rect x="2" y="2" width="12" height="12" fill="#1e5631"/><rect x="4" y="4" width="8" height="8" fill="#4cbb17"/></svg>`;
+}
+function greenRupeeSvg() {
+  return `<svg viewBox="0 0 7 11" width="10" height="15"><polygon points="3.5,0 7,3 7,8 3.5,11 0,8 0,3" fill="#2ecc71"/></svg>`;
+}
+function blueRupeeSvg() {
+  return `<svg viewBox="0 0 7 11" width="10" height="15"><polygon points="3.5,0 7,3 7,8 3.5,11 0,8 0,3" fill="#3498db"/></svg>`;
+}
+function masterSwordSvg() {
+  return `<svg viewBox="0 0 16 16" width="24" height="24"><rect x="7" y="2" width="2" height="8" fill="#d1d8e0"/><rect x="5" y="4" width="6" height="1" fill="#3867d6"/><rect x="7" y="10" width="2" height="4" fill="#4b6584"/></svg>`;
+}
 
+/* ═══════════════════════════════════════════
+   DATA DE LOS TRABAJOS PRÁCTICOS
+═══════════════════════════════════════════ */
+const levels = [
+  {n:'01', name:'Primer Trabajo', tag:'HTML', tagClass:'tag-html', href:'tp-1/', svg:linkVerdeSvg, region:'Lost Woods', cx:10, cy:14, zone:'woods'},
+  {n:'02', name:'Selectores CSS', tag:'CSS',  tagClass:'tag-css',  href:'tp-2/', svg:korokSvg,     region:'Lost Woods', cx:26, cy:12, zone:'woods'},
+  {n:'03', name:'Especificidad',  tag:'CSS',  tagClass:'tag-css',  href:'tp-3/', svg:linkRojoSvg,  region:'Death Mountain', cx:48, cy:12, zone:'mountain'},
+  {n:'04', name:'Media Queries',  tag:'CSS',  tagClass:'tag-css',  href:'tp-4/', svg:bokoblinSvg,  region:'Death Mountain', cx:72, cy:12, zone:'mountain'},
+  {n:'05', name:'Bootstrap Base', tag:'BOOT', tagClass:'tag-boot', href:'tp-5/', svg:zeldaSvg,     region:'Hyrule Castle',  cx:50, cy:34, zone:'castle'},
+  {n:'06', name:'Grilla Boot',    tag:'BOOT', tagClass:'tag-boot', href:'tp-6/', svg:linkAzulSvg,  region:'Zora Domain',    cx:85, cy:36, zone:'domain'},
+  {n:'07', name:'Bootstrap (2)',  tag:'BOOT', tagClass:'tag-boot', href:'tp-7/', svg:linkVerdeSvg, region:'Hyrule Castle',  cx:50, cy:54, zone:'castle'},
+  {n:'08', name:'Funciones JS',   tag:'JS',   tagClass:'tag-js',   href:'tp-8/', svg:bokoblinSvg,  region:'Gerudo Desert',  cx:12, cy:48, zone:'desert'},
+  {n:'09', name:'Listas JS',      tag:'JS',   tagClass:'tag-js',   href:'tp-9/', svg:linkRojoSvg,  region:'Gerudo Desert',  cx:24, cy:68, zone:'desert'},
+  {n:'10', name:'Objetos JS',     tag:'JS',   tagClass:'tag-js',   href:'tp-10/', svg:korokSvg,     region:'Gerudo Desert',  cx:14, cy:86, zone:'desert'},
+  {n:'11', name:'Listas y Obj',   tag:'JS',   tagClass:'tag-js',   href:'tp-11/', svg:linkAzulSvg,  region:'Lake Hylia',     cx:82, cy:62, zone:'domain'},
+  {n:'12', name:'Trabajo 12',     tag:'JS',   tagClass:'tag-js',   href:'tp-12/', svg:zeldaSvg,     region:'Lake Hylia',     cx:74, cy:82, zone:'domain'},
+  {n:'13', name:'Trabajo 13',     tag:'JS',   tagClass:'tag-js',   href:'tp-13/', svg:linkVerdeSvg, region:'Kakariko Village',cx:42, cy:74, zone:'necluda'},
+  {n:'14', name:'Trabajo 14',     tag:'JS',   tagClass:'tag-js',   href:'tp-14/', svg:korokSvg,     region:'Necluda Fields',  cx:58, cy:74, zone:'necluda'},
+  {n:'15', name:'Trabajo 15',     tag:'JS',   tagClass:'tag-js',   href:'tp-15/', svg:bokoblinSvg,  region:'Necluda Fields',  cx:48, cy:90, zone:'necluda'},
+  {n:'16', name:'Trabajo 16',     tag:'PHP',  tagClass:'tag-php',  href:'tp-16/', svg:linkRojoSvg,  region:'Ganon Lair',      cx:90, cy:90, zone:'necluda'}
+];
+
+/* ═══════════════════════════════════════════
+   INYECTAR TILES DECORATIVOS EN EL MAPA
+═══════════════════════════════════════════ */
+const decoContainer = document.getElementById('decos');
+const mapEl = document.getElementById('wmap');
+
+function addDeco(html, leftPct, topPct) {
+  const d = document.createElement('div');
+  d.className = 'deco';
+  d.style.left = leftPct + '%';
+  d.style.top = topPct + '%';
+  d.style.transform = 'translate(-50%,-50%)';
+  d.innerHTML = html;
+  decoContainer.appendChild(d);
+}
+
+// Poblando el mapa de matorrales y rupias secretas
+for(let i=0; i<6; i++) addDeco(shrubSvg(), 4+i*5, 24);
+for(let i=0; i<4; i++) addDeco(greenRupeeSvg(), 8+i*6, 8);
+addDeco(masterSwordSvg(), 18, 6); // La espada maestra oculta en el bosque
+
+// Montaña
+for(let i=0; i<4; i++) addDeco(shrubSvg(), 40+i*6, 6);
+for(let i=0; i<3; i++) addDeco(blueRupeeSvg(), 60+i*4, 18);
+
+// Desierto
+for(let i=0; i<4; i++) addDeco(greenRupeeSvg(), 5+i*6, 60);
+
+// Zora / Lagos
+for(let i=0; i<4; i++) addDeco(blueRupeeSvg(), 75+i*4, 46);
+
+/* ═══════════════════════════════════════════
+   RENDERIZAR ENTRADAS DE TRABAJOS PRÁCTICOS
+═══════════════════════════════════════════ */
+const stagesEl = document.getElementById('stages-container');
+
+levels.forEach((lvl, i) => {
+  const a = document.createElement('a');
+  a.className = 'stage';
+  a.href = lvl.href;
+  a.style.left = lvl.cx + '%';
+  a.style.top = lvl.cy + '%';
+
+  const zoneBg = {
+    woods:'#2ecc71', mountain:'#e74c3c', castle:'#95a5a6', desert:'#f1c40f', domain:'#3498db', necluda:'#e67e22'
+  };
+  const bg = zoneBg[lvl.zone] || '#fff';
+
+  a.innerHTML = `
+    <div class="stage-circle" style="background:${bg};">${lvl.svg}</div>
+    <div class="stage-num">TP ${lvl.n}</div>
+    <div class="stage-name">${lvl.name.toUpperCase()}</div>
+    <span class="stage-tag ${lvl.tagClass}">${lvl.tag}</span>`;
+
+  a.addEventListener('mouseenter', () => {
+    document.getElementById('hud-stage').textContent =
+      `${lvl.region.toUpperCase()} ▶ TP ${lvl.n}: ${lvl.name.toUpperCase()}`;
+  });
+  stagesEl.appendChild(a);
+});
+
+/* ═══════════════════════════════════════════
+   DIBUJAR CAMINOS ENTRE NODOS (ALINEACIÓN)
+═══════════════════════════════════════════ */
+function drawPath() {
+  const svgEl = document.getElementById('path-svg');
+  const mapRect = mapEl.getBoundingClientRect();
+  const circles = [...mapEl.querySelectorAll('.stage-circle')];
+  const pts = circles.map(c => {
+    const r = c.getBoundingClientRect();
+    return { x: r.left - mapRect.left + r.width / 2, y: r.top - mapRect.top + r.height / 2 };
+  });
+  if (pts.length < 2) return;
+  
+  svgEl.setAttribute('viewBox', `0 0 ${mapEl.offsetWidth} ${mapEl.offsetHeight}`);
+  while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    const A = pts[i], B = pts[i + 1];
+    
+    // Borde marrón exterior de la ruta
+    const rb = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    rb.setAttribute('x1', A.x); rb.setAttribute('y1', A.y);
+    rb.setAttribute('x2', B.x); rb.setAttribute('y2', B.y);
+    rb.setAttribute('stroke', '#5c3a21'); rb.setAttribute('stroke-width', '10');
+    rb.setAttribute('stroke-linecap', 'round');
+    svgEl.appendChild(rb);
+
+    // Relleno camino arenoso claro
+    const rf = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    rf.setAttribute('x1', A.x); rf.setAttribute('y1', A.y);
+    rf.setAttribute('x2', B.x); rf.setAttribute('y2', B.y);
+    rf.setAttribute('stroke', '#f3e5ab'); rf.setAttribute('stroke-width', '6');
+    rf.setAttribute('stroke-linecap', 'round');
+    svgEl.appendChild(rf);
+  }
+}
+
+// Ajustes de carga y redimensionamiento
+window.addEventListener('load', () => {
+  setTimeout(drawPath, 150);
+  // Ocultar pantalla de carga automáticamente a los 1.2 segundos
+  setTimeout(() => {
+    const loader = document.getElementById('loading-overlay');
+    loader.style.opacity = '0';
+    setTimeout(() => loader.style.display = 'none', 400);
+  }, 1200);
+});
+window.addEventListener('resize', drawPath);
+</script>
+
+<style>
+/* ─── ANIMACIONES DE HOVER EN PIXELS (ZELDA) ─── */
+.stage:hover .link-anim { animation: z-jump 0.4s steps(4) infinite; }
+.stage:hover .zelda-anim { animation: z-float 0.6s ease-in-out infinite; }
+.stage:hover .korok-anim { animation: z-spin 0.5s linear infinite; }
+.stage:hover .boko-anim { animation: z-shake 0.2s linear infinite; }
+
+@keyframes z-jump {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes z-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes z-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes z-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+</style>
 </body>
 </html>
