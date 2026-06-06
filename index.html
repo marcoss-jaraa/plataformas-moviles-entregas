@@ -1,400 +1,348 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Plataformas Móviles — Hyrule Map Index</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
-<style>
-/* ─── RESET & FONT ─── */
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Press Start 2P',monospace;background:#050806;overflow-x:hidden;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.H.I.E.L.D. HQ — Plataformas Móviles: Misiones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #000; color: #fff; font-family: 'Roboto', sans-serif; }
+        
+        /* Contenedor principal para el renderizado 3D (ocupa toda la pantalla) */
+        #three-container { width: 100vw; height: 100vh; display: block; }
 
-/* ─── MAP FRAME (Zelda-style golden/brown border) ─── */
-.nes-frame{
-  max-width:950px;margin:20px auto;padding:12px;
-  background:#000;
-}
-.nes-inner{
-  border:4px solid #d4af37;
-  background:#1b241e;
-  padding:4px;
-  box-shadow:0 0 0 4px #000, 0 0 0 8px #8a6f1c;
-  image-rendering:pixelated;
-}
+        /* Estilos de la interfaz HUD superpuesta */
+        .hud-overlay { position: absolute; pointer-events: none; }
+        
+        .header { top: 20px; left: 20px; text-align: left; }
+        .header h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; margin: 0; color: #00d2ff; letter-spacing: 2px; text-shadow: 0 0 10px #00d2ff; }
+        .header p { font-size: 10px; margin: 5px 0; color: #888; }
 
-/* ─── WORLD MAP CANVAS ─── */
-.world-map{
-  position:relative;
-  width:100%;
-  background:#dfb76c; /* Base arenosa/pergamino */
-  overflow:hidden;
-  min-height:580px;
-}
+        .footer { bottom: 20px; width: 100%; text-align: center; }
+        .footer span { font-size: 9px; color: #555; letter-spacing: 1px; }
 
-/* ─── ZONE PANELS ─── */
-.zone{
-  position:absolute;
-  border:2px solid rgba(0,0,0,0.2);
-}
+        /* Panel lateral dinámico que aparece al hacer hover en un TP */
+        #data-panel {
+            position: absolute; top: 100px; right: -300px; /* Oculto a la derecha */
+            width: 250px; padding: 20px;
+            background: rgba(0, 10, 20, 0.85);
+            border: 1px solid #00d2ff; border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            pointer-events: auto; /* Permite clicks */
+            transition: right 0.4s ease; /* Animación de entrada/salida */
+            z-index: 100;
+        }
+        #data-panel.active { right: 20px; } /* Clase para mostrarlo */
+        
+        #data-panel h2 { font-family: 'Orbitron', sans-serif; color: #00d2ff; margin-top: 0; font-size: 16px; border-bottom: 1px solid #00d2ff; padding-bottom: 10px; }
+        #data-panel p { color: #ccc; font-size: 12px; line-height: 1.5; }
+        #data-panel .tag { display: inline-block; padding: 3px 8px; border-radius: 2px; font-size: 9px; font-weight: bold; background: rgba(0,210,255,0.1); color: #00d2ff; margin-bottom: 10px;}
+        #btn-go {
+            display: block; width: 100%; padding: 10px; margin-top: 15px;
+            background: transparent; border: 1px solid #00d2ff; color: #00d2ff;
+            font-family: 'Orbitron', sans-serif; font-size: 12px; cursor: pointer;
+            transition: background 0.3s ease; text-decoration: none; text-align: center;
+        }
+        #btn-go:hover { background: #00d2ff; color: #000; }
 
-/* ─── STAGE NODES ─── */
-.stage{
-  position:absolute;
-  z-index:10;
-  cursor:pointer;
-  text-decoration:none;
-  display:flex;flex-direction:column;align-items:center;
-  width:85px;
-  transform:translate(-50%,-50%);
-}
-.stage-circle{
-  width:52px;height:52px;
-  border-radius:50%;
-  border:3px solid #000;
-  background:#fff;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
-  box-shadow:2px 3px 0 #000;
-  transition:transform .12s, box-shadow .12s;
-  position:relative;
-}
-.stage:hover .stage-circle{
-  transform:translateY(-5px) scale(1.1);
-  box-shadow:2px 8px 0 #000;
-}
-.stage-num{
-  font-size:6px;color:#fff;
-  background:#d4af37;border:2px solid #000;
-  padding:2px 4px;border-radius:1px;
-  margin-top:4px;box-shadow:1px 1px 0 #000;
-  white-space:nowrap;
-}
-.stage-name{
-  font-size:5px;
-  background:rgba(0,0,0,.85);
-  color: #fff;
-  border:1px solid #d4af37;
-  padding:2px 4px;
-  border-radius:1px;
-  margin-top:3px;
-  text-align:center;
-  max-width:90px;
-  line-height:1.4;
-}
-.stage-tag{
-  font-size:6px;padding:1px 3px;border:1px solid;border-radius:1px;margin-top:2px;
-}
-.tag-html {color:#000; border-color:#000; background:#ff9f43;}
-.tag-css  {color:#000; border-color:#000; background:#54a0ff;}
-.tag-js   {color:#000; border-color:#000; background:#feca57;}
-.tag-boot {color:#000; border-color:#000; background:#a55eed;}
-.tag-php  {color:#000; border-color:#000; background:#ff6b6b;}
-
-/* ─── SPRITE SVGS ─── */
-.stage-circle svg{image-rendering:pixelated;width:42px;height:42px;}
-
-/* ─── DECORATIVE TILES ─── */
-.deco{position:absolute;z-index:3;pointer-events:none;font-size:0;}
-.deco svg{image-rendering:pixelated;}
-
-/* ─── HUD BAR ─── */
-.hud-bar{
-  background:#000;color:#fff;
-  display:flex;align-items:center;gap:1rem;
-  padding:10px;font-size:7px;letter-spacing:1px;
-  border-top:3px solid #d4af37;
-}
-.hud-bar span{color:#d4af37;}
-.hud-bar .text-white{color:#fff;}
-
-/* ─── LOADING OVERLAY ─── */
-#loading-overlay{
-  position:fixed;inset:0;
-  background:#000;z-index:9999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
-  transition: opacity 0.4s ease;
-}
-.lo-title{font-size:10px;color:#d4af37;letter-spacing:3px;}
-.lo-game{font-size:14px;color:#fff;letter-spacing:2px;animation:blink 1s step-end infinite;}
-
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
-
-/* ─── REGIONES DE HYRULE (GRADIENTS) ─── */
-.zone-woods{background: linear-gradient(135deg, #1b4d22 0%, #226f34 100%);}
-.zone-mountain{background: linear-gradient(135deg, #78281f 0%, #b03a2e 100%);}
-.zone-castle{background: linear-gradient(135deg, #2e4053 0%, #566573 100%);}
-.zone-desert{background: linear-gradient(135deg, #ca9b52 0%, #e5c185 100%);}
-.zone-domain{background: linear-gradient(135deg, #114b79 0%, #2980b9 100%);}
-.zone-necluda{background: linear-gradient(135deg, #515a5a 0%, #7e5109 100%);}
-</style>
+    </style>
 </head>
 <body>
 
-<div id="loading-overlay">
-  <div class="lo-title">ENTERING HYRULE</div>
-  <div class="lo-game">THE LEGEND OF ZELDA</div>
-  <div style="color:#d4af37; font-size:8px;">LOADING QUEST LOG...</div>
-</div>
+    <div class="hud-overlay header">
+        <h1>S.H.I.E.L.D. ACCESS PROTOCOL</h1>
+        <p>ACTIVE MISSION LOG :: AVENGERS INITIATIVE PART: PLATAFORMAS MÓVILES</p>
+    </div>
 
-<div class="nes-frame">
-<div class="nes-inner">
+    <div id="data-panel">
+        <span class="tag" id="tp-tag">HTML</span>
+        <h2 id="tp-title">MISIÓN 01</h2>
+        <p id="tp-desc">Análisis y estructura base de datos. Protocolo HTML inicial.</p>
+        <a href="#" id="btn-go" target="_blank">INICIAR MISIÓN</a>
+    </div>
 
-<div class="world-map" id="wmap" style="height:580px;">
+    <div class="hud-overlay footer">
+        <span>"Avenge the fallen." — PROYECTO ACADÉMICO. 2026.</span>
+    </div>
 
-  <div class="zone zone-woods" style="left:0;top:0;width:35%;height:38%;"></div>
-  <div class="zone zone-mountain" style="left:34%;top:0;width:66%;height:30%;"></div>
-  <div class="zone zone-castle" style="left:34%;top:29%;width:36%;height:36%;"></div>
-  <div class="zone zone-desert" style="left:0;top:37%;width:35%;height:63%;"></div>
-  <div class="zone zone-domain" style="left:69%;top:29%;width:31%;height:41%;"></div>
-  <div class="zone zone-necluda" style="left:34%;top:64%;width:66%;height:36%;"></div>
+    <canvas id="three-container"></canvas>
 
-  <div id="decos"></div>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js"></script>
 
-  <svg id="path-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible;" xmlns="http://www.w3.org/2000/svg"></svg>
+    <script type="module">
+        // Importamos módulos adicionales necesarios para la interacción
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-  <div id="stages-container" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>
+        /* ════════════════════════════════════════════════
+           DATA DE LAS MISIONES (TRABAJOS PRÁCTICOS)
+        ════════════════════════════════════════════════ */
+        const missions = [
+            {n:'01', name:'Primer Trabajo', tag:'HTML', href:'tp-1/', desc:'Estructura básica del sitio.', color:'#ff9f43'},
+            {n:'02', name:'Selectores CSS', tag:'CSS',  href:'tp-2/', desc:'Estilado fundamental de elementos.', color:'#54a0ff'},
+            {n:'03', name:'Especificidad',  tag:'CSS',  href:'tp-3/', desc:'Jerarquía y cascada de estilos.', color:'#54a0ff'},
+            {n:'04', name:'Media Queries',  tag:'CSS',  href:'tp-4/', desc:'Diseño responsivo para móviles.', color:'#54a0ff'},
+            {n:'05', name:'Bootstrap Base', tag:'BOOT', href:'tp-5/', desc:'Uso elemental del framework.', color:'#a55eed'},
+            {n:'06', name:'Grilla Boot',    tag:'BOOT', href:'tp-6/', desc:'Maquetación responsiva avanzada.', color:'#a55eed'},
+            {n:'07', name:'Bootstrap (2)',  tag:'BOOT', href:'tp-7/', desc:'Integración profunda de componentes.', color:'#a55eed'},
+            {n:'08', name:'Funciones JS',   tag:'JS',   href:'tp-8/', desc:'Programación funcional básica.', color:'#feca57'},
+            {n:'09', name:'Listas JS',      tag:'JS',   href:'tp-9/', desc:'Manejo de arrays y bucles.', color:'#feca57'},
+            {n:'10', name:'Objetos JS',     tag:'JS',   href:'tp-10/', href:'tp-10/', desc:'Estructuras de datos complejas.', color:'#feca57'},
+            {n:'11', name:'Listas y Obj',   tag:'JS',   href:'tp-11/', desc:'Manipulación DOM avanzada.', color:'#feca57'},
+            {n:'12', name:'Trabajo 12',     tag:'JS',   href:'tp-12/', desc:'Módulo de Lógica Avanzada.', color:'#feca57'},
+            {n:'13', name:'Trabajo 13',     tag:'JS',   href:'tp-13/', desc:'Persistencia de Datos.', color:'#feca57'},
+            {n:'14', name:'Trabajo 14',     tag:'JS',   href:'tp-14/', desc:'Integración de APIs.', color:'#feca57'},
+            {n:'15', name:'Trabajo 15',     tag:'JS',   href:'tp-15/', desc:'Control de flujo de datos.', color:'#feca57'},
+            {n:'16', name:'Trabajo 16',     tag:'PHP',  href:'tp-16/', desc:'Introducción al Backend.', color:'#ff6b6b'}
+        ];
 
-</div>
+        /* ════════════════════════════════════════════════
+           CONFIGURACIÓN BASE DE THREE.JS (ESCENA CENTRAL)
+        ════════════════════════════════════════════════ */
+        let scene, camera, renderer, controls, raycaster, mouse;
+        let missionOrbs = []; // Array para guardar las mallas 3D de los TPs
+        let hoveredOrb = null; // Guardar el orbe sobre el que está el mouse
 
-<div class="hud-bar">
-  <span>QUEST LOG</span>
-  <span id="hud-stage" class="text-white">▶ SELECCIONA UNA MISIÓN</span>
-  <span style="margin-left:auto">LINK.START</span>
-</div>
+        function init() {
+            // 1. La Escena (El "mundo" 3D)
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x00050a); // Fondo azul oscurísimo Stark
+            // Niebla para dar profundidad
+            scene.fog = new THREE.FogExp2(0x00050a, 0.05);
 
-</div>
-</div>
+            // 2. La Cámara (Nuestra "vista")
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 10, 25); // Posición inicial (arriba y atrás)
 
-<script>
-/* ════════════════════════════════════════════════
-   PIXEL ART SVGS (ZELDA STYLE 14x14)
-════════════════════════════════════════════════ */
+            // 3. El Renderizador (Dibuja la escena en el canvas HTML)
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-container'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
 
-// Link Clásico (Verde)
-const linkVerdeSvg = `<svg viewBox="0 0 14 14" class="link-anim">
-<rect x="4" y="0" width="6" height="3" fill="#228b22"/>
-<rect x="3" y="1" width="8" height="1" fill="#228b22"/>
-<rect x="3" y="3" width="7" height="3" fill="#ffdbac"/>
-<rect x="4" y="4" width="1" height="1" fill="#000"/><rect x="8" y="4" width="1" height="1" fill="#000"/>
-<rect x="3" y="2" width="8" height="1" fill="#ffcc00"/>
-<rect x="3" y="6" width="8" height="4" fill="#228b22"/>
-<rect x="3" y="7" width="8" height="1" fill="#8b5a2b"/>
-<rect x="2" y="7" width="1" height="2" fill="#ffdbac"/><rect x="11" y="7" width="1" height="2" fill="#ffdbac"/>
-<rect x="4" y="10" width="2" height="3" fill="#8b5a2b"/><rect x="8" y="10" width="2" height="3" fill="#8b5a2b"/>
-</svg>`;
+            // 4. Controles (Permite mover la cámara con el mouse)
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; // Movimiento suave
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 5; // Zoom mínimo
+            controls.maxDistance = 50; // Zoom máximo
+            controls.maxPolarAngle = Math.PI / 2; // No bajar de la mesa
 
-// Link Azul (Zora armor)
-const linkAzulSvg = linkVerdeSvg.replace(/#228b22/g, '#2980b9');
+            // 5. Luces (Sin luces, todo es negro)
+            const ambientLight = new THREE.AmbientLight(0x112233); // Luz de ambiente suave
+            scene.add(ambientLight);
 
-// Link Rojo (Goron armor)
-const linkRojoSvg = linkVerdeSvg.replace(/#228b22/g, '#c0392b');
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Luz como el sol
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
 
-// Princesa Zelda
-const zeldaSvg = `<svg viewBox="0 0 14 14" class="zelda-anim">
-<rect x="4" y="0" width="6" height="3" fill="#ffcc00"/>
-<rect x="3" y="3" width="8" height="3" fill="#ffdbac"/>
-<rect x="4" y="4" width="1" height="1" fill="#4a90e2"/><rect x="8" y="4" width="1" height="1" fill="#4a90e2"/>
-<rect x="3" y="6" width="8" height="2" fill="#ffffff"/>
-<rect x="2" y="8" width="10" height="5" fill="#e84393"/>
-<rect x="5" y="8" width="4" height="5" fill="#ffffff"/>
-<rect x="5" y="9" width="4" height="1" fill="#d4af37"/>
-</svg>`;
+            // Luz puntual azul en el centro para el efecto holograma
+            const pointLight = new THREE.PointLight(0x00d2ff, 2, 50);
+            pointLight.position.set(0, 5, 0);
+            scene.add(pointLight);
 
-// Kolog (Korok)
-const korokSvg = `<svg viewBox="0 0 14 14" class="korok-anim">
-<rect x="4" y="2" width="6" height="8" fill="#8b5a2b"/>
-<rect x="2" y="3" width="10" height="5" fill="#27ae60"/>
-<rect x="3" y="2" width="2" height="2" fill="#26ade4"/>
-<rect x="5" y="5" width="1" height="1" fill="#000"/><rect x="8" y="5" width="1" height="1" fill="#000"/>
-<rect x="6" y="7" width="2" height="1" fill="#111"/>
-<rect x="3" y="10" width="2" height="2" fill="#5c3a21"/><rect x="9" y="10" width="2" height="2" fill="#5c3a21"/>
-</svg>`;
+            // 6. Raycaster y Mouse (Para detectar clicks/hovers en 3D)
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
 
-// Bokoblin
-const bokoblinSvg = `<svg viewBox="0 0 14 14" class="boko-anim">
-<rect x="3" y="1" width="8" height="5" fill="#e74c3c"/>
-<rect x="2" y="0" width="2" height="2" fill="#fff"/><rect x="10" y="0" width="2" height="2" fill="#fff"/>
-<rect x="4" y="3" width="1" height="1" fill="#fff"/><rect x="9" y="3" width="1" height="1" fill="#fff"/>
-<rect x="4" y="5" width="6" height="2" fill="#f1c40f"/>
-<rect x="3" y="7" width="8" height="4" fill="#34495e"/>
-<rect x="4" y="11" width="2" height="2" fill="#e74c3c"/><rect x="8" y="11" width="2" height="2" fill="#e74c3c"/>
-</svg>`;
+            // ════ CONSTRUCCIÓN DE OBJETOS 3D ════
+            createWarTable();
+            createMissionOrbs();
+            createAvengersIcons();
 
+            // Eventos
+            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('mousemove', onMouseMove, false);
+            window.addEventListener('click', onMouseClick, false);
 
-/* ═══════════════════════════════════════════
-   DECORACIONES ELEMENTALES (RUPIAS, ARBUSTOS)
-═══════════════════════════════════════════ */
-function shrubSvg() {
-  return `<svg viewBox="0 0 16 16" width="20" height="20"><rect x="2" y="2" width="12" height="12" fill="#1e5631"/><rect x="4" y="4" width="8" height="8" fill="#4cbb17"/></svg>`;
-}
-function greenRupeeSvg() {
-  return `<svg viewBox="0 0 7 11" width="10" height="15"><polygon points="3.5,0 7,3 7,8 3.5,11 0,8 0,3" fill="#2ecc71"/></svg>`;
-}
-function blueRupeeSvg() {
-  return `<svg viewBox="0 0 7 11" width="10" height="15"><polygon points="3.5,0 7,3 7,8 3.5,11 0,8 0,3" fill="#3498db"/></svg>`;
-}
-function masterSwordSvg() {
-  return `<svg viewBox="0 0 16 16" width="24" height="24"><rect x="7" y="2" width="2" height="8" fill="#d1d8e0"/><rect x="5" y="4" width="6" height="1" fill="#3867d6"/><rect x="7" y="10" width="2" height="4" fill="#4b6584"/></svg>`;
-}
+            animate(); // Iniciar loop de renderizado
+        }
 
-/* ═══════════════════════════════════════════
-   DATA DE LOS TRABAJOS PRÁCTICOS
-═══════════════════════════════════════════ */
-const levels = [
-  {n:'01', name:'Primer Trabajo', tag:'HTML', tagClass:'tag-html', href:'tp-1/', svg:linkVerdeSvg, region:'Lost Woods', cx:10, cy:14, zone:'woods'},
-  {n:'02', name:'Selectores CSS', tag:'CSS',  tagClass:'tag-css',  href:'tp-2/', svg:korokSvg,     region:'Lost Woods', cx:26, cy:12, zone:'woods'},
-  {n:'03', name:'Especificidad',  tag:'CSS',  tagClass:'tag-css',  href:'tp-3/', svg:linkRojoSvg,  region:'Death Mountain', cx:48, cy:12, zone:'mountain'},
-  {n:'04', name:'Media Queries',  tag:'CSS',  tagClass:'tag-css',  href:'tp-4/', svg:bokoblinSvg,  region:'Death Mountain', cx:72, cy:12, zone:'mountain'},
-  {n:'05', name:'Bootstrap Base', tag:'BOOT', tagClass:'tag-boot', href:'tp-5/', svg:zeldaSvg,     region:'Hyrule Castle',  cx:50, cy:34, zone:'castle'},
-  {n:'06', name:'Grilla Boot',    tag:'BOOT', tagClass:'tag-boot', href:'tp-6/', svg:linkAzulSvg,  region:'Zora Domain',    cx:85, cy:36, zone:'domain'},
-  {n:'07', name:'Bootstrap (2)',  tag:'BOOT', tagClass:'tag-boot', href:'tp-7/', svg:linkVerdeSvg, region:'Hyrule Castle',  cx:50, cy:54, zone:'castle'},
-  {n:'08', name:'Funciones JS',   tag:'JS',   tagClass:'tag-js',   href:'tp-8/', svg:bokoblinSvg,  region:'Gerudo Desert',  cx:12, cy:48, zone:'desert'},
-  {n:'09', name:'Listas JS',      tag:'JS',   tagClass:'tag-js',   href:'tp-9/', svg:linkRojoSvg,  region:'Gerudo Desert',  cx:24, cy:68, zone:'desert'},
-  {n:'10', name:'Objetos JS',     tag:'JS',   tagClass:'tag-js',   href:'tp-10/', svg:korokSvg,     region:'Gerudo Desert',  cx:14, cy:86, zone:'desert'},
-  {n:'11', name:'Listas y Obj',   tag:'JS',   tagClass:'tag-js',   href:'tp-11/', svg:linkAzulSvg,  region:'Lake Hylia',     cx:82, cy:62, zone:'domain'},
-  {n:'12', name:'Trabajo 12',     tag:'JS',   tagClass:'tag-js',   href:'tp-12/', svg:zeldaSvg,     region:'Lake Hylia',     cx:74, cy:82, zone:'domain'},
-  {n:'13', name:'Trabajo 13',     tag:'JS',   tagClass:'tag-js',   href:'tp-13/', svg:linkVerdeSvg, region:'Kakariko Village',cx:42, cy:74, zone:'necluda'},
-  {n:'14', name:'Trabajo 14',     tag:'JS',   tagClass:'tag-js',   href:'tp-14/', svg:korokSvg,     region:'Necluda Fields',  cx:58, cy:74, zone:'necluda'},
-  {n:'15', name:'Trabajo 15',     tag:'JS',   tagClass:'tag-js',   href:'tp-15/', svg:bokoblinSvg,  region:'Necluda Fields',  cx:48, cy:90, zone:'necluda'},
-  {n:'16', name:'Trabajo 16',     tag:'PHP',  tagClass:'tag-php',  href:'tp-16/', svg:linkRojoSvg,  region:'Ganon Lair',      cx:90, cy:90, zone:'necluda'}
-];
+        /* ════════════════════════════════════════════════
+           CREACIÓN DE OBJETOS GEOMÉTRICOS 3D
+        ════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════
-   INYECTAR TILES DECORATIVOS EN EL MAPA
-═══════════════════════════════════════════ */
-const decoContainer = document.getElementById('decos');
-const mapEl = document.getElementById('wmap');
+        // Crea la "Mesa de Guerra" base
+        function createWarTable() {
+            // Geometría: Cilindro chato
+            const tableGeometry = new THREE.CylinderGeometry(15, 15, 1, 64);
+            // Material: Metal oscuro brillante
+            const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.2 });
+            const table = new THREE.Mesh(tableGeometry, tableMaterial);
+            table.position.y = -0.5; // Bajarla un poco
+            scene.add(table);
 
-function addDeco(html, leftPct, topPct) {
-  const d = document.createElement('div');
-  d.className = 'deco';
-  d.style.left = leftPct + '%';
-  d.style.top = topPct + '%';
-  d.style.transform = 'translate(-50%,-50%)';
-  d.innerHTML = html;
-  decoContainer.appendChild(d);
-}
+            // Grilla holográfica azul sobre la mesa
+            const gridHelper = new THREE.GridHelper(28, 28, 0x00d2ff, 0x003344);
+            gridHelper.position.y = 0.01; // Justo encima
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+        }
 
-// Poblando el mapa de matorrales y rupias secretas
-for(let i=0; i<6; i++) addDeco(shrubSvg(), 4+i*5, 24);
-for(let i=0; i<4; i++) addDeco(greenRupeeSvg(), 8+i*6, 8);
-addDeco(masterSwordSvg(), 18, 6); // La espada maestra oculta en el bosque
+        // Crea los orbes flotantes de las misiones (TPs)
+        function createMissionOrbs() {
+            // Geometría común: Icosaedro (parece una esfera tallada, muy tech)
+            const geometry = new THREE.IcosahedronGeometry(1, 1);
+            
+            missions.forEach((mission, i) => {
+                // Material común: Transparente y emisivo (brilla)
+                const material = new THREE.MeshStandardMaterial({
+                    color: mission.color,
+                    emissive: mission.color, // Color del brillo
+                    emissiveIntensity: 1, // Intensidad inicial
+                    transparent: true,
+                    opacity: 0.7,
+                    wireframe: true // Estilo "red de alambre" holográfico
+                });
+                const orb = new THREE.Mesh(geometry, material);
 
-// Montaña
-for(let i=0; i<4; i++) addDeco(shrubSvg(), 40+i*6, 6);
-for(let i=0; i<3; i++) addDeco(blueRupeeSvg(), 60+i*4, 18);
+                // POSICIONAMIENTO MATEMÁTICO 3D
+                // Usamos seno y coseno para distribuirlos en espiral flotando sobre la mesa
+                const angle = i * (Math.PI * 2 / missions.length) * 1.2; // Ángulo
+                const radius = 6 + (i * 0.4); // Radio creciente (espiral)
+                orb.position.x = Math.cos(angle) * radius;
+                orb.position.z = Math.sin(angle) * radius;
+                orb.position.y = 3 + Math.sin(angle * 2) * 1.5; // Altura variable (onda)
 
-// Desierto
-for(let i=0; i<4; i++) addDeco(greenRupeeSvg(), 5+i*6, 60);
+                // Guardar la data de la misión dentro del objeto 3D
+                orb.userData = { missionData: mission, originalY: orb.position.y, angleOffset: angle };
+                
+                missionOrbs.push(orb);
+                scene.add(orb);
+            });
+        }
 
-// Zora / Lagos
-for(let i=0; i<4; i++) addDeco(blueRupeeSvg(), 75+i*4, 46);
+        // Crea íconos abstractos de los Vengadores para decorar
+        function createAvengersIcons() {
+            // Ícono CAPITÁN AMÉRICA (Escudo Geométrico)
+            const capGroup = new THREE.Group();
+            const diskGeom = new THREE.CylinderGeometry(3, 3, 0.2, 32);
+            const redMat = new THREE.MeshStandardMaterial({ color: 0xaa0000 });
+            const blueMat = new THREE.MeshStandardMaterial({ color: 0x0000aa });
+            const disk1 = new THREE.Mesh(diskGeom, redMat);
+            const disk2 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.21, 32), blueMat);
+            capGroup.add(disk1, disk2);
+            capGroup.rotation.x = Math.PI / 2; // Girar vertical
+            capGroup.position.set(-18, 5, -5);
+            scene.add(capGroup);
 
-/* ═══════════════════════════════════════════
-   RENDERIZAR ENTRADAS DE TRABAJOS PRÁCTICOS
-═══════════════════════════════════════════ */
-const stagesEl = document.getElementById('stages-container');
+            // Ícono IRON MAN (Arc Reactor Geométrico)
+            const arcReactor = new THREE.Mesh(
+                new THREE.TorusGeometry(2, 0.2, 8, 24),
+                new THREE.MeshStandardMaterial({ color: 0x00d2ff, emissive: 0x00d2ff, emissiveIntensity: 2 })
+            );
+            arcReactor.position.set(15, 6, 12);
+            scene.add(arcReactor);
+        }
 
-levels.forEach((lvl, i) => {
-  const a = document.createElement('a');
-  a.className = 'stage';
-  a.href = lvl.href;
-  a.style.left = lvl.cx + '%';
-  a.style.top = lvl.cy + '%';
+        /* ════════════════════════════════════════════════
+           LÓGICA DE INTERACCIÓN (MOUSE)
+        ════════════════════════════════════════════════ */
 
-  const zoneBg = {
-    woods:'#2ecc71', mountain:'#e74c3c', castle:'#95a5a6', desert:'#f1c40f', domain:'#3498db', necluda:'#e67e22'
-  };
-  const bg = zoneBg[lvl.zone] || '#fff';
+        const dataPanel = document.getElementById('data-panel');
+        const tpTitle = document.getElementById('tp-title');
+        const tpDesc = document.getElementById('tp-desc');
+        const tpTag = document.getElementById('tp-tag');
+        const btnGo = document.getElementById('btn-go');
 
-  a.innerHTML = `
-    <div class="stage-circle" style="background:${bg};">${lvl.svg}</div>
-    <div class="stage-num">TP ${lvl.n}</div>
-    <div class="stage-name">${lvl.name.toUpperCase()}</div>
-    <span class="stage-tag ${lvl.tagClass}">${lvl.tag}</span>`;
+        function onMouseMove(event) {
+            // Convertir coordenadas de mouse 2D a coordenadas normalizadas 3D (-1 a +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
 
-  a.addEventListener('mouseenter', () => {
-    document.getElementById('hud-stage').textContent =
-      `${lvl.region.toUpperCase()} ▶ TP ${lvl.n}: ${lvl.name.toUpperCase()}`;
-  });
-  stagesEl.appendChild(a);
-});
+        function onMouseClick() {
+            // Si hay un orbe bajo el mouse, abrir el link
+            if (hoveredOrb) {
+                window.open(hoveredOrb.userData.missionData.href, '_blank');
+            }
+        }
 
-/* ═══════════════════════════════════════════
-   DIBUJAR CAMINOS ENTRE NODOS (ALINEACIÓN)
-═══════════════════════════════════════════ */
-function drawPath() {
-  const svgEl = document.getElementById('path-svg');
-  const mapRect = mapEl.getBoundingClientRect();
-  const circles = [...mapEl.querySelectorAll('.stage-circle')];
-  const pts = circles.map(c => {
-    const r = c.getBoundingClientRect();
-    return { x: r.left - mapRect.left + r.width / 2, y: r.top - mapRect.top + r.height / 2 };
-  });
-  if (pts.length < 2) return;
-  
-  svgEl.setAttribute('viewBox', `0 0 ${mapEl.offsetWidth} ${mapEl.offsetHeight}`);
-  while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+        /* ════════════════════════════════════════════════
+           LOOP DE ANIMACIÓN Y RENDERIZADO (CORE)
+        ════════════════════════════════════════════════ */
+        
+        const clock = new THREE.Clock(); // Medir el tiempo para animaciones constantes
 
-  for (let i = 0; i < pts.length - 1; i++) {
-    const A = pts[i], B = pts[i + 1];
-    
-    // Borde marrón exterior de la ruta
-    const rb = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    rb.setAttribute('x1', A.x); rb.setAttribute('y1', A.y);
-    rb.setAttribute('x2', B.x); rb.setAttribute('y2', B.y);
-    rb.setAttribute('stroke', '#5c3a21'); rb.setAttribute('stroke-width', '10');
-    rb.setAttribute('stroke-linecap', 'round');
-    svgEl.appendChild(rb);
+        function animate() {
+            requestAnimationFrame(animate); // Llamar a esta función en el próximo frame
 
-    // Relleno camino arenoso claro
-    const rf = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    rf.setAttribute('x1', A.x); rf.setAttribute('y1', A.y);
-    rf.setAttribute('x2', B.x); rf.setAttribute('y2', B.y);
-    rf.setAttribute('stroke', '#f3e5ab'); rf.setAttribute('stroke-width', '6');
-    rf.setAttribute('stroke-linecap', 'round');
-    svgEl.appendChild(rf);
-  }
-}
+            const elapsedTime = clock.getElapsedTime(); // Tiempo total transcurrido
 
-// Ajustes de carga y redimensionamiento
-window.addEventListener('load', () => {
-  setTimeout(drawPath, 150);
-  // Ocultar pantalla de carga automáticamente a los 1.2 segundos
-  setTimeout(() => {
-    const loader = document.getElementById('loading-overlay');
-    loader.style.opacity = '0';
-    setTimeout(() => loader.style.display = 'none', 400);
-  }, 1200);
-});
-window.addEventListener('resize', drawPath);
-</script>
+            // 1. Actualizar controles de cámara
+            controls.update();
 
-<style>
-/* ─── ANIMACIONES DE HOVER EN PIXELS (ZELDA) ─── */
-.stage:hover .link-anim { animation: z-jump 0.4s steps(4) infinite; }
-.stage:hover .zelda-anim { animation: z-float 0.6s ease-in-out infinite; }
-.stage:hover .korok-anim { animation: z-spin 0.5s linear infinite; }
-.stage:hover .boko-anim { animation: z-shake 0.2s linear infinite; }
+            // 2. Animación de los orbes (Hacerlos flotar y rotar)
+            missionOrbs.forEach((orb) => {
+                orb.rotation.y += 0.01; // Rotación sobre eje Y
+                orb.rotation.x += 0.005; // Rotación sobre eje X
 
-@keyframes z-jump {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-@keyframes z-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-@keyframes z-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-@keyframes z-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-2px); }
-  75% { transform: translateX(2px); }
-}
-</style>
+                // Efecto flotante usando Seno (oscilación)
+                const data = orb.userData;
+                orb.position.y = data.originalY + Math.sin(elapsedTime * 2 + data.angleOffset) * 0.5;
+            });
+
+            // 3. Lógica de Raycasting (Detección de Mouse/Hover)
+            raycaster.setFromCamera(mouse, camera); // Actualizar rayo desde la cámara
+            const intersects = raycaster.intersectObjects(missionOrbs); // Buscar intersecciones
+
+            if (intersects.length > 0) {
+                // El orbe más cercano bajo el mouse
+                const firstObject = intersects[0].object;
+
+                if (hoveredOrb !== firstObject) {
+                    // SI ACABAMOS DE ENTRAR A UN NUEVO ORBE
+                    if (hoveredOrb) resetOrbEffects(hoveredOrb); // Resetear anterior
+
+                    hoveredOrb = firstObject;
+                    applyOrbHoverEffects(hoveredOrb);
+                }
+            } else {
+                // SI EL MOUSE NO ESTÁ SOBRE NINGÚN ORBE
+                if (hoveredOrb) {
+                    resetOrbEffects(hoveredOrb);
+                    hoveredOrb = null;
+                }
+            }
+
+            // 4. Renderizar la escena final
+            renderer.render(scene, camera);
+        }
+
+        // Efectos al pasar el mouse por encima del orbe
+        function applyOrbHoverEffects(orb) {
+            orb.material.wireframe = false; // Pasar a sólido
+            orb.material.emissiveIntensity = 3; // Brillo máximo
+            orb.scale.set(1.2, 1.2, 1.2); // Agrandar
+
+            // Actualizar y Mostrar panel de datos UI
+            const data = orb.userData.missionData;
+            tpTitle.textContent = `TP ${data.n} - ${data.name.toUpperCase()}`;
+            tpDesc.textContent = data.desc;
+            tpTag.textContent = data.tag;
+            tpTag.style.color = data.color;
+            tpTag.style.border = `1px solid ${data.color}`;
+            btnGo.href = data.href;
+            dataPanel.classList.add('active'); // Mostrar panel
+        }
+
+        // Resetear efectos originales del orbe
+        function resetOrbEffects(orb) {
+            orb.material.wireframe = true;
+            orb.material.emissiveIntensity = 1;
+            orb.scale.set(1, 1, 1);
+            dataPanel.classList.remove('active'); // Ocultar panel
+        }
+
+        // Manejar redimensionamiento de ventana
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        init(); // Arrancar todo
+
+    </script>
 </body>
 </html>
