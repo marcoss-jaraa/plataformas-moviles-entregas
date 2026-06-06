@@ -3,240 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.H.I.E.L.D. HQ — Plataformas Móviles: Misiones</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <title>Westeros Repository — Trabajos Prácticos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #000; color: #fff; font-family: 'Roboto', sans-serif; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #050505; 
+            color: #d4af37; /* Dorado */
+            font-family: 'Cormorant Garamond', serif; 
+        }
         
-        /* Contenedor principal para el renderizado 3D (ocupa toda la pantalla) */
+        /* Contenedor principal para el renderizado 3D */
         #three-container { width: 100vw; height: 100vh; display: block; }
 
-        /* Estilos de la interfaz HUD superpuesta */
-        .hud-overlay { position: absolute; pointer-events: none; }
+        /* Interfaz superpuesta (HUD) */
+        .hud-overlay { position: absolute; pointer-events: none; z-index: 10; }
         
-        .header { top: 20px; left: 20px; text-align: left; }
-        .header h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; margin: 0; color: #00d2ff; letter-spacing: 2px; text-shadow: 0 0 10px #00d2ff; }
-        .header p { font-size: 10px; margin: 5px 0; color: #888; }
+        .header { top: 30px; left: 30px; text-align: left; }
+        .header h1 { 
+            font-family: 'Cinzel', serif; 
+            font-size: 24px; 
+            margin: 0; 
+            color: #d4af37; 
+            letter-spacing: 3px; 
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5); 
+        }
+        .header p { font-size: 14px; margin: 5px 0; color: #a0a0a0; font-style: italic; letter-spacing: 1px; }
 
         .footer { bottom: 20px; width: 100%; text-align: center; }
-        .footer span { font-size: 9px; color: #555; letter-spacing: 1px; }
+        .footer span { font-size: 12px; color: #777; letter-spacing: 2px; font-family: 'Cinzel', serif;}
 
-        /* Panel lateral dinámico que aparece al hacer hover en un TP */
+        /* Panel lateral dinámico (El Estandarte) */
         #data-panel {
-            position: absolute; top: 100px; right: -300px; /* Oculto a la derecha */
-            width: 250px; padding: 20px;
-            background: rgba(0, 10, 20, 0.85);
-            border: 1px solid #00d2ff; border-radius: 4px;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
-            pointer-events: auto; /* Permite clicks */
-            transition: right 0.4s ease; /* Animación de entrada/salida */
+            position: absolute; top: 50%; right: -350px; 
+            transform: translateY(-50%);
+            width: 280px; padding: 30px;
+            background: linear-gradient(135deg, rgba(20, 5, 5, 0.95), rgba(10, 10, 10, 0.95));
+            border: 1px solid #d4af37; 
+            border-left: 4px solid #8b0000; /* Rojo sangre */
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(212, 175, 55, 0.1);
+            pointer-events: auto; 
+            transition: right 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
             z-index: 100;
         }
-        #data-panel.active { right: 20px; } /* Clase para mostrarlo */
+        #data-panel.active { right: 30px; }
         
-        #data-panel h2 { font-family: 'Orbitron', sans-serif; color: #00d2ff; margin-top: 0; font-size: 16px; border-bottom: 1px solid #00d2ff; padding-bottom: 10px; }
-        #data-panel p { color: #ccc; font-size: 12px; line-height: 1.5; }
-        #data-panel .tag { display: inline-block; padding: 3px 8px; border-radius: 2px; font-size: 9px; font-weight: bold; background: rgba(0,210,255,0.1); color: #00d2ff; margin-bottom: 10px;}
-        #btn-go {
-            display: block; width: 100%; padding: 10px; margin-top: 15px;
-            background: transparent; border: 1px solid #00d2ff; color: #00d2ff;
-            font-family: 'Orbitron', sans-serif; font-size: 12px; cursor: pointer;
-            transition: background 0.3s ease; text-decoration: none; text-align: center;
+        #data-panel h2 { 
+            font-family: 'Cinzel', serif; 
+            color: #d4af37; 
+            margin-top: 0; 
+            font-size: 20px; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3); 
+            padding-bottom: 10px; 
+            letter-spacing: 1px;
         }
-        #btn-go:hover { background: #00d2ff; color: #000; }
+        #data-panel p { color: #cccccc; font-size: 16px; line-height: 1.6; }
+        
+        #data-panel .tag { 
+            display: inline-block; padding: 4px 10px; font-family: 'Cinzel', serif; 
+            font-size: 11px; font-weight: bold; background: rgba(139, 0, 0, 0.2); 
+            color: #ff4444; border: 1px solid #8b0000; margin-bottom: 15px; letter-spacing: 1px;
+        }
 
+        #btn-go {
+            display: block; width: 100%; padding: 12px; margin-top: 25px;
+            background: transparent; border: 1px solid #d4af37; color: #d4af37;
+            font-family: 'Cinzel', serif; font-size: 14px; font-weight: bold; cursor: pointer;
+            transition: all 0.3s ease; text-decoration: none; text-align: center; box-sizing: border-box;
+        }
+        #btn-go:hover { background: rgba(212, 175, 55, 0.2); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+
+        /* Efecto de cargando */
+        #loading {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; color: #d4af37; display: flex; justify-content: center; align-items: center;
+            font-family: 'Cinzel', serif; font-size: 24px; z-index: 999; letter-spacing: 4px;
+            transition: opacity 1s ease;
+        }
     </style>
 </head>
 <body>
 
+    <div id="loading">Forjando el Reino...</div>
+
     <div class="hud-overlay header">
-        <h1>S.H.I.E.L.D. ACCESS PROTOCOL</h1>
-        <p>ACTIVE MISSION LOG :: AVENGERS INITIATIVE PART: PLATAFORMAS MÓVILES</p>
+        <h1>ARCHIVOS DE LA CIUDADELA</h1>
+        <p>Tomos Académicos :: Lenguaje C y Estructuras</p>
     </div>
 
     <div id="data-panel">
-        <span class="tag" id="tp-tag">HTML</span>
-        <h2 id="tp-title">MISIÓN 01</h2>
-        <p id="tp-desc">Análisis y estructura base de datos. Protocolo HTML inicial.</p>
-        <a href="#" id="btn-go" target="_blank">INICIAR MISIÓN</a>
+        <span class="tag" id="tp-tag">C / LENGUAJE</span>
+        <h2 id="tp-title">TOMO 01</h2>
+        <p id="tp-desc">Descripción del archivo y los misterios que alberga en su interior.</p>
+        <a href="#" id="btn-go" target="_blank">ABRIR TOMO</a>
     </div>
 
     <div class="hud-overlay footer">
-        <span>"Avenge the fallen." — PROYECTO ACADÉMICO. 2026.</span>
+        <span>"Winter is coming." — Ciclo Lectivo 2026</span>
     </div>
 
     <canvas id="three-container"></canvas>
 
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 
     <script type="module">
-        // Importamos módulos adicionales necesarios para la interacción
-        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         /* ════════════════════════════════════════════════
-           DATA DE LAS MISIONES (TRABAJOS PRÁCTICOS)
+           DATOS DE LOS TRABAJOS (INSPIRADOS EN LAS CASAS)
         ════════════════════════════════════════════════ */
         const missions = [
-            {n:'01', name:'Primer Trabajo', tag:'HTML', href:'tp-1/', desc:'Estructura básica del sitio.', color:'#ff9f43'},
-            {n:'02', name:'Selectores CSS', tag:'CSS',  href:'tp-2/', desc:'Estilado fundamental de elementos.', color:'#54a0ff'},
-            {n:'03', name:'Especificidad',  tag:'CSS',  href:'tp-3/', desc:'Jerarquía y cascada de estilos.', color:'#54a0ff'},
-            {n:'04', name:'Media Queries',  tag:'CSS',  href:'tp-4/', desc:'Diseño responsivo para móviles.', color:'#54a0ff'},
-            {n:'05', name:'Bootstrap Base', tag:'BOOT', href:'tp-5/', desc:'Uso elemental del framework.', color:'#a55eed'},
-            {n:'06', name:'Grilla Boot',    tag:'BOOT', href:'tp-6/', desc:'Maquetación responsiva avanzada.', color:'#a55eed'},
-            {n:'07', name:'Bootstrap (2)',  tag:'BOOT', href:'tp-7/', desc:'Integración profunda de componentes.', color:'#a55eed'},
-            {n:'08', name:'Funciones JS',   tag:'JS',   href:'tp-8/', desc:'Programación funcional básica.', color:'#feca57'},
-            {n:'09', name:'Listas JS',      tag:'JS',   href:'tp-9/', desc:'Manejo de arrays y bucles.', color:'#feca57'},
-            {n:'10', name:'Objetos JS',     tag:'JS',   href:'tp-10/', href:'tp-10/', desc:'Estructuras de datos complejas.', color:'#feca57'},
-            {n:'11', name:'Listas y Obj',   tag:'JS',   href:'tp-11/', desc:'Manipulación DOM avanzada.', color:'#feca57'},
-            {n:'12', name:'Trabajo 12',     tag:'JS',   href:'tp-12/', desc:'Módulo de Lógica Avanzada.', color:'#feca57'},
-            {n:'13', name:'Trabajo 13',     tag:'JS',   href:'tp-13/', desc:'Persistencia de Datos.', color:'#feca57'},
-            {n:'14', name:'Trabajo 14',     tag:'JS',   href:'tp-14/', desc:'Integración de APIs.', color:'#feca57'},
-            {n:'15', name:'Trabajo 15',     tag:'JS',   href:'tp-15/', desc:'Control de flujo de datos.', color:'#feca57'},
-            {n:'16', name:'Trabajo 16',     tag:'PHP',  href:'tp-16/', desc:'Introducción al Backend.', color:'#ff6b6b'}
+            {n:'01', name:'Fundamentos', tag:'C / LÓGICA', href:'tp-1/', desc:'Introducción a la programación en C. El invierno se acerca, y hay que preparar la lógica base.', color:'#ffffff'},
+            {n:'02', name:'Structs Simples', tag:'C / DATOS',  href:'tp-2/', desc:'Agrupación de datos en estructuras. Un Lannister siempre ordena sus variables.', color:'#d4af37'},
+            {n:'03', name:'Estructuras Anidadas',  tag:'C / DOBLE STRUCT',  href:'tp-3/', desc:'Structs dentro de structs (ej: Alumno y Materia). Sangre y Fuego en la gestión de memoria.', color:'#8b0000'},
+            {n:'04', name:'UI de Consola',  tag:'C / GOTOXY',  href:'tp-4/', desc:'Manejo de coordenadas en pantalla usando gotoxy. Nuestra es la furia visual.', color:'#b8860b'}
         ];
 
         /* ════════════════════════════════════════════════
-           CONFIGURACIÓN BASE DE THREE.JS (ESCENA CENTRAL)
+           CONFIGURACIÓN BASE DE THREE.JS
         ════════════════════════════════════════════════ */
         let scene, camera, renderer, controls, raycaster, mouse;
-        let missionOrbs = []; // Array para guardar las mallas 3D de los TPs
-        let hoveredOrb = null; // Guardar el orbe sobre el que está el mouse
+        let missionOrbs = []; 
+        let hoveredOrb = null; 
+        let astrolabeRings = []; // Anillos de la intro
+        let embers; // Partículas de fuego
 
         function init() {
-            // 1. La Escena (El "mundo" 3D)
+            // Escena Oscura
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x00050a); // Fondo azul oscurísimo Stark
-            // Niebla para dar profundidad
-            scene.fog = new THREE.FogExp2(0x00050a, 0.05);
+            scene.background = new THREE.Color(0x0a0505); 
+            scene.fog = new THREE.FogExp2(0x0a0505, 0.04); // Niebla oscura
 
-            // 2. La Cámara (Nuestra "vista")
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, 25); // Posición inicial (arriba y atrás)
+            // Cámara
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 30); 
 
-            // 3. El Renderizador (Dibuja la escena en el canvas HTML)
+            // Renderizador
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-container'), antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping; // Colores más cinemáticos
+            renderer.toneMappingExposure = 1.2;
 
-            // 4. Controles (Permite mover la cámara con el mouse)
+            // Controles
             controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true; // Movimiento suave
+            controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.minDistance = 5; // Zoom mínimo
-            controls.maxDistance = 50; // Zoom máximo
-            controls.maxPolarAngle = Math.PI / 2; // No bajar de la mesa
+            controls.minDistance = 10;
+            controls.maxDistance = 50;
+            controls.maxPolarAngle = Math.PI / 1.8; 
 
-            // 5. Luces (Sin luces, todo es negro)
-            const ambientLight = new THREE.AmbientLight(0x112233); // Luz de ambiente suave
+            // Luces (Fuego y Oro)
+            const ambientLight = new THREE.AmbientLight(0x221111); 
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Luz como el sol
-            directionalLight.position.set(5, 10, 7.5);
-            scene.add(directionalLight);
+            const fireLight = new THREE.PointLight(0xff4400, 500, 100);
+            fireLight.position.set(0, 0, 0);
+            scene.add(fireLight);
 
-            // Luz puntual azul en el centro para el efecto holograma
-            const pointLight = new THREE.PointLight(0x00d2ff, 2, 50);
-            pointLight.position.set(0, 5, 0);
-            scene.add(pointLight);
+            const goldLight = new THREE.DirectionalLight(0xffdd88, 2);
+            goldLight.position.set(10, 20, 10);
+            scene.add(goldLight);
 
-            // 6. Raycaster y Mouse (Para detectar clicks/hovers en 3D)
             raycaster = new THREE.Raycaster();
             mouse = new THREE.Vector2();
 
-            // ════ CONSTRUCCIÓN DE OBJETOS 3D ════
-            createWarTable();
-            createMissionOrbs();
-            createAvengersIcons();
+            // Construcción
+            createAstrolabe();
+            createMissionEggs();
+            createEmbers();
+
+            // Quitar pantalla de carga
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => document.getElementById('loading').style.display = 'none', 1000);
+            }, 1000);
 
             // Eventos
             window.addEventListener('resize', onWindowResize, false);
             window.addEventListener('mousemove', onMouseMove, false);
             window.addEventListener('click', onMouseClick, false);
 
-            animate(); // Iniciar loop de renderizado
+            animate(); 
         }
 
         /* ════════════════════════════════════════════════
-           CREACIÓN DE OBJETOS GEOMÉTRICOS 3D
+           CREACIÓN DE OBJETOS GEOMÉTRICOS 3D (GoT STYLE)
         ════════════════════════════════════════════════ */
 
-        // Crea la "Mesa de Guerra" base
-        function createWarTable() {
-            // Geometría: Cilindro chato
-            const tableGeometry = new THREE.CylinderGeometry(15, 15, 1, 64);
-            // Material: Metal oscuro brillante
-            const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.2 });
-            const table = new THREE.Mesh(tableGeometry, tableMaterial);
-            table.position.y = -0.5; // Bajarla un poco
-            scene.add(table);
+        function createAstrolabe() {
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0xd4af37, 
+                metalness: 0.8, 
+                roughness: 0.3,
+                emissive: 0x221100
+            });
 
-            // Grilla holográfica azul sobre la mesa
-            const gridHelper = new THREE.GridHelper(28, 28, 0x00d2ff, 0x003344);
-            gridHelper.position.y = 0.01; // Justo encima
-            gridHelper.material.opacity = 0.3;
-            gridHelper.material.transparent = true;
-            scene.add(gridHelper);
+            // Crear 3 anillos concéntricos rotatorios
+            for(let i=0; i<3; i++) {
+                const geometry = new THREE.TorusGeometry(5 + (i * 1.5), 0.15, 16, 100);
+                const ring = new THREE.Mesh(geometry, material);
+                // Inclinaciones iniciales aleatorias
+                ring.rotation.x = Math.random() * Math.PI;
+                ring.rotation.y = Math.random() * Math.PI;
+                
+                // Velocidad de rotación personalizada
+                ring.userData = {
+                    speedX: (Math.random() - 0.5) * 0.01,
+                    speedY: (Math.random() - 0.5) * 0.01,
+                    speedZ: (Math.random() - 0.5) * 0.01
+                };
+                
+                astrolabeRings.push(ring);
+                scene.add(ring);
+            }
+
+            // Esfera central (El Sol / Centro del mundo)
+            const sunGeo = new THREE.SphereGeometry(2, 32, 32);
+            const sunMat = new THREE.MeshStandardMaterial({
+                color: 0xff4400,
+                emissive: 0xff2200,
+                emissiveIntensity: 2,
+                wireframe: true
+            });
+            const sun = new THREE.Mesh(sunGeo, sunMat);
+            scene.add(sun);
         }
 
-        // Crea los orbes flotantes de las misiones (TPs)
-        function createMissionOrbs() {
-            // Geometría común: Icosaedro (parece una esfera tallada, muy tech)
-            const geometry = new THREE.IcosahedronGeometry(1, 1);
+        // Crea esferas representando "Huevos de Dragón" o tomos
+        function createMissionEggs() {
+            const geometry = new THREE.SphereGeometry(1.2, 32, 32);
             
             missions.forEach((mission, i) => {
-                // Material común: Transparente y emisivo (brilla)
                 const material = new THREE.MeshStandardMaterial({
                     color: mission.color,
-                    emissive: mission.color, // Color del brillo
-                    emissiveIntensity: 1, // Intensidad inicial
-                    transparent: true,
-                    opacity: 0.7,
-                    wireframe: true // Estilo "red de alambre" holográfico
+                    metalness: 0.6,
+                    roughness: 0.2,
+                    emissive: mission.color,
+                    emissiveIntensity: 0.2
                 });
-                const orb = new THREE.Mesh(geometry, material);
+                const egg = new THREE.Mesh(geometry, material);
 
-                // POSICIONAMIENTO MATEMÁTICO 3D
-                // Usamos seno y coseno para distribuirlos en espiral flotando sobre la mesa
-                const angle = i * (Math.PI * 2 / missions.length) * 1.2; // Ángulo
-                const radius = 6 + (i * 0.4); // Radio creciente (espiral)
-                orb.position.x = Math.cos(angle) * radius;
-                orb.position.z = Math.sin(angle) * radius;
-                orb.position.y = 3 + Math.sin(angle * 2) * 1.5; // Altura variable (onda)
+                // Posicionar en círculo alrededor del astrolabio
+                const angle = (i / missions.length) * Math.PI * 2;
+                const radius = 12;
+                egg.position.x = Math.cos(angle) * radius;
+                egg.position.z = Math.sin(angle) * radius;
+                egg.position.y = 0; 
 
-                // Guardar la data de la misión dentro del objeto 3D
-                orb.userData = { missionData: mission, originalY: orb.position.y, angleOffset: angle };
+                egg.userData = { missionData: mission, originalY: 0, angleOffset: angle };
                 
-                missionOrbs.push(orb);
-                scene.add(orb);
+                missionOrbs.push(egg);
+                scene.add(egg);
             });
         }
 
-        // Crea íconos abstractos de los Vengadores para decorar
-        function createAvengersIcons() {
-            // Ícono CAPITÁN AMÉRICA (Escudo Geométrico)
-            const capGroup = new THREE.Group();
-            const diskGeom = new THREE.CylinderGeometry(3, 3, 0.2, 32);
-            const redMat = new THREE.MeshStandardMaterial({ color: 0xaa0000 });
-            const blueMat = new THREE.MeshStandardMaterial({ color: 0x0000aa });
-            const disk1 = new THREE.Mesh(diskGeom, redMat);
-            const disk2 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.21, 32), blueMat);
-            capGroup.add(disk1, disk2);
-            capGroup.rotation.x = Math.PI / 2; // Girar vertical
-            capGroup.position.set(-18, 5, -5);
-            scene.add(capGroup);
+        // Sistema de partículas para simular fuego/cenizas flotando
+        function createEmbers() {
+            const particleCount = 1000;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
 
-            // Ícono IRON MAN (Arc Reactor Geométrico)
-            const arcReactor = new THREE.Mesh(
-                new THREE.TorusGeometry(2, 0.2, 8, 24),
-                new THREE.MeshStandardMaterial({ color: 0x00d2ff, emissive: 0x00d2ff, emissiveIntensity: 2 })
-            );
-            arcReactor.position.set(15, 6, 12);
-            scene.add(arcReactor);
+            for (let i = 0; i < particleCount * 3; i++) {
+                // Distribuir en un área amplia
+                positions[i] = (Math.random() - 0.5) * 60; 
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const material = new THREE.PointsMaterial({
+                color: 0xffaa00,
+                size: 0.15,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            embers = new THREE.Points(geometry, material);
+            scene.add(embers);
         }
 
         /* ════════════════════════════════════════════════
-           LÓGICA DE INTERACCIÓN (MOUSE)
+           LÓGICA DE INTERACCIÓN Y UI
         ════════════════════════════════════════════════ */
 
         const dataPanel = document.getElementById('data-panel');
@@ -246,102 +304,113 @@
         const btnGo = document.getElementById('btn-go');
 
         function onMouseMove(event) {
-            // Convertir coordenadas de mouse 2D a coordenadas normalizadas 3D (-1 a +1)
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
 
         function onMouseClick() {
-            // Si hay un orbe bajo el mouse, abrir el link
             if (hoveredOrb) {
                 window.open(hoveredOrb.userData.missionData.href, '_blank');
             }
         }
 
         /* ════════════════════════════════════════════════
-           LOOP DE ANIMACIÓN Y RENDERIZADO (CORE)
+           LOOP DE ANIMACIÓN (CORE)
         ════════════════════════════════════════════════ */
         
-        const clock = new THREE.Clock(); // Medir el tiempo para animaciones constantes
+        const clock = new THREE.Clock(); 
 
         function animate() {
-            requestAnimationFrame(animate); // Llamar a esta función en el próximo frame
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime(); 
 
-            const elapsedTime = clock.getElapsedTime(); // Tiempo total transcurrido
-
-            // 1. Actualizar controles de cámara
             controls.update();
 
-            // 2. Animación de los orbes (Hacerlos flotar y rotar)
-            missionOrbs.forEach((orb) => {
-                orb.rotation.y += 0.01; // Rotación sobre eje Y
-                orb.rotation.x += 0.005; // Rotación sobre eje X
-
-                // Efecto flotante usando Seno (oscilación)
-                const data = orb.userData;
-                orb.position.y = data.originalY + Math.sin(elapsedTime * 2 + data.angleOffset) * 0.5;
+            // Animar el astrolabio central
+            astrolabeRings.forEach(ring => {
+                ring.rotation.x += ring.userData.speedX;
+                ring.rotation.y += ring.userData.speedY;
+                ring.rotation.z += ring.userData.speedZ;
             });
 
-            // 3. Lógica de Raycasting (Detección de Mouse/Hover)
-            raycaster.setFromCamera(mouse, camera); // Actualizar rayo desde la cámara
-            const intersects = raycaster.intersectObjects(missionOrbs); // Buscar intersecciones
+            // Animar las cenizas flotando hacia arriba
+            const positions = embers.geometry.attributes.position.array;
+            for (let i = 1; i < positions.length; i += 3) {
+                positions[i] += 0.05; // Suben en el eje Y
+                if (positions[i] > 30) {
+                    positions[i] = -30; // Si suben mucho, reaparecen abajo
+                }
+            }
+            embers.geometry.attributes.position.needsUpdate = true;
+
+            // Animar los "tomos" / huevos
+            missionOrbs.forEach((orb) => {
+                orb.rotation.y += 0.005; 
+                const data = orb.userData;
+                // Efecto flotante
+                orb.position.y = data.originalY + Math.sin(elapsedTime * 1.5 + data.angleOffset) * 1.5;
+            });
+
+            // Lógica de Raycasting
+            raycaster.setFromCamera(mouse, camera); 
+            const intersects = raycaster.intersectObjects(missionOrbs); 
 
             if (intersects.length > 0) {
-                // El orbe más cercano bajo el mouse
                 const firstObject = intersects[0].object;
+                document.body.style.cursor = 'pointer';
 
                 if (hoveredOrb !== firstObject) {
-                    // SI ACABAMOS DE ENTRAR A UN NUEVO ORBE
-                    if (hoveredOrb) resetOrbEffects(hoveredOrb); // Resetear anterior
-
+                    if (hoveredOrb) resetOrbEffects(hoveredOrb); 
                     hoveredOrb = firstObject;
                     applyOrbHoverEffects(hoveredOrb);
                 }
             } else {
-                // SI EL MOUSE NO ESTÁ SOBRE NINGÚN ORBE
+                document.body.style.cursor = 'default';
                 if (hoveredOrb) {
                     resetOrbEffects(hoveredOrb);
                     hoveredOrb = null;
                 }
             }
 
-            // 4. Renderizar la escena final
             renderer.render(scene, camera);
         }
 
-        // Efectos al pasar el mouse por encima del orbe
         function applyOrbHoverEffects(orb) {
-            orb.material.wireframe = false; // Pasar a sólido
-            orb.material.emissiveIntensity = 3; // Brillo máximo
-            orb.scale.set(1.2, 1.2, 1.2); // Agrandar
+            orb.material.emissiveIntensity = 0.8; 
+            orb.scale.set(1.2, 1.2, 1.2); 
 
-            // Actualizar y Mostrar panel de datos UI
+            // Actualizar UI
             const data = orb.userData.missionData;
-            tpTitle.textContent = `TP ${data.n} - ${data.name.toUpperCase()}`;
+            tpTitle.textContent = `TOMO ${data.n} - ${data.name.toUpperCase()}`;
             tpDesc.textContent = data.desc;
             tpTag.textContent = data.tag;
-            tpTag.style.color = data.color;
-            tpTag.style.border = `1px solid ${data.color}`;
+            
+            // Adaptar colores del tag
+            let tagColor = '#8b0000'; // Default rojo
+            if(data.color === '#d4af37' || data.color === '#b8860b') tagColor = '#b8860b'; // Dorado
+            if(data.color === '#ffffff') tagColor = '#aaaaaa'; // Gris/Blanco
+            
+            tpTag.style.color = tagColor;
+            tpTag.style.borderColor = tagColor;
+            tpTag.style.backgroundColor = `${tagColor}22`; // Color con transparencia
+
             btnGo.href = data.href;
-            dataPanel.classList.add('active'); // Mostrar panel
+            dataPanel.classList.add('active'); 
         }
 
-        // Resetear efectos originales del orbe
         function resetOrbEffects(orb) {
-            orb.material.wireframe = true;
-            orb.material.emissiveIntensity = 1;
+            orb.material.emissiveIntensity = 0.2;
             orb.scale.set(1, 1, 1);
-            dataPanel.classList.remove('active'); // Ocultar panel
+            dataPanel.classList.remove('active'); 
         }
 
-        // Manejar redimensionamiento de ventana
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        init(); // Arrancar todo
+        init(); 
 
     </script>
 </body>
