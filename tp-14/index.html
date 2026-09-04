@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lista de Contactos - DOM y JavaScript</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container my-1 my-sm-2 my-md-4 my-lg-5">
+
+        <h1>Lista de Contactos</h1>
+
+        <div class="card">
+            <div class="card-body">
+
+                <h2>Contactos</h2>
+
+                <div class="row mb-3">
+
+                    <div class="col-12 col-md-4 mb-2">
+                        <input
+                            type="text"
+                            id="buscador"
+                            class="form-control"
+                            placeholder="Buscar contacto..."
+                        >
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-2">
+                        <select id="ordenar-por" class="form-select">
+                            <option value="nombre">Ordenar por nombre</option>
+                            <option value="apellido">Ordenar por apellido</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-2">
+                        <button id="btn-favoritos" class="btn btn-warning w-100">
+                            Ver solo favoritos
+                        </button>
+                    </div>
+
+                </div>
+
+                <ul id="lista-contactos" class="list-group mb-3"></ul>
+
+                <button id="btn-eliminar-seleccionados" class="btn btn-danger">
+                    Eliminar seleccionados
+                </button>
+
+                <hr class="hr">
+
+                <h2>Nuevo Contacto</h2>
+
+                <form id="form-producto">
+
+                    <div class="input-group mb-3">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="nombre"
+                            id="input-nombre"
+                            placeholder="Nombre"
+                            aria-label="Nombre"
+                        >
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="apellido"
+                            id="input-apellido"
+                            placeholder="Apellido"
+                            aria-label="Apellido"
+                        >
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="telefono"
+                            id="input-telefono"
+                            placeholder="Teléfono"
+                            aria-label="Teléfono"
+                        >
+
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">
+                        Agregar Contacto
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        let contactos = [
+            {
+                nombre: 'Juan',
+                apellido: 'Perez',
+                telefono: '1123456789',
+                favorito: false,
+                seleccionado: false
+            }
+        ];
+
+        let mostrarSoloFavoritos = false;
+
+        function agregarContacto(nombre, apellido, telefono) {
+
+            nombre = nombre.trim();
+            apellido = apellido.trim();
+            telefono = telefono.trim();
+
+            if (nombre !== '' && apellido !== '' && telefono !== '') {
+
+                contactos.push({
+                    nombre: nombre,
+                    apellido: apellido,
+                    telefono: telefono,
+                    favorito: false,
+                    seleccionado: false
+                });
+
+                mostrarListado();
+            }
+        }
+
+
+        function mostrarListado() {
+
+            const lista = document.getElementById('lista-contactos');
+
+            const textoBuscado = document
+                .getElementById('buscador')
+                .value
+                .toLowerCase();
+
+            const ordenarPor = document.getElementById('ordenar-por').value;
+
+            lista.innerHTML = '';
+
+            contactos.sort(function(a, b) {
+
+                if (ordenarPor === 'nombre') {
+                    return a.nombre.localeCompare(b.nombre);
+                }
+
+                return a.apellido.localeCompare(b.apellido);
+            });
+
+
+            contactos.forEach(function(contacto, indice) {
+
+                const coincideBusqueda =
+                    contacto.nombre.toLowerCase().includes(textoBuscado) ||
+                    contacto.apellido.toLowerCase().includes(textoBuscado) ||
+                    contacto.telefono.toLowerCase().includes(textoBuscado);
+
+                const coincideFavorito =
+                    !mostrarSoloFavoritos || contacto.favorito;
+
+
+                if (coincideBusqueda && coincideFavorito) {
+
+                    const li = document.createElement('li');
+
+                    li.className =
+                        'list-group-item d-flex justify-content-between align-items-center';
+
+
+                    const izquierda = document.createElement('div');
+
+
+                    const checkbox = document.createElement('input');
+
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input me-2';
+                    checkbox.checked = contacto.seleccionado;
+
+
+                    checkbox.addEventListener('change', function() {
+
+                        contacto.seleccionado = checkbox.checked;
+
+                    });
+
+
+                    const texto = document.createElement('span');
+
+                    texto.textContent =
+                        contacto.nombre +
+                        ' ' +
+                        contacto.apellido +
+                        ' - ' +
+                        contacto.telefono;
+
+
+                    if (contacto.favorito) {
+                        texto.textContent += ' ★';
+                    }
+
+
+                    izquierda.appendChild(checkbox);
+                    izquierda.appendChild(texto);
+
+
+                    const botones = document.createElement('div');
+
+
+                    const btnFavorito = document.createElement('button');
+
+                    btnFavorito.className = 'btn btn-warning btn-sm me-2';
+
+                    if (contacto.favorito) {
+                        btnFavorito.textContent = 'Quitar favorito';
+                    } else {
+                        btnFavorito.textContent = 'Favorito';
+                    }
+
+
+                    btnFavorito.addEventListener('click', function() {
+
+                        contacto.favorito = !contacto.favorito;
+
+                        mostrarListado();
+
+                    });
+
+
+                    const btnEditar = document.createElement('button');
+
+                    btnEditar.className = 'btn btn-primary btn-sm me-2';
+                    btnEditar.textContent = 'Editar';
+
+
+                    btnEditar.addEventListener('click', function() {
+
+                        editarContacto(indice);
+
+                    });
+
+
+                    const btnEliminar = document.createElement('button');
+
+                    btnEliminar.className = 'btn btn-danger btn-sm';
+                    btnEliminar.textContent = 'Eliminar';
+
+
+                    btnEliminar.addEventListener('click', function() {
+
+                        eliminarContacto(indice);
+
+                    });
+
+
+                    botones.appendChild(btnFavorito);
+                    botones.appendChild(btnEditar);
+                    botones.appendChild(btnEliminar);
+
+
+                    li.appendChild(izquierda);
+                    li.appendChild(botones);
+
+                    lista.appendChild(li);
+                }
+
+            });
+
+        }
+
+
+        function editarContacto(indice) {
+
+            const nuevoNombre = prompt(
+                'Nuevo nombre:',
+                contactos[indice].nombre
+            );
+
+            if (nuevoNombre === null) {
+                return;
+            }
+
+
+            const nuevoApellido = prompt(
+                'Nuevo apellido:',
+                contactos[indice].apellido
+            );
+
+            if (nuevoApellido === null) {
+                return;
+            }
+
+
+            const nuevoTelefono = prompt(
+                'Nuevo teléfono:',
+                contactos[indice].telefono
+            );
+
+            if (nuevoTelefono === null) {
+                return;
+            }
+
+
+            if (
+                nuevoNombre.trim() !== '' &&
+                nuevoApellido.trim() !== '' &&
+                nuevoTelefono.trim() !== ''
+            ) {
+
+                contactos[indice].nombre = nuevoNombre.trim();
+
+                contactos[indice].apellido = nuevoApellido.trim();
+
+                contactos[indice].telefono = nuevoTelefono.trim();
+
+                mostrarListado();
+            }
+        }
+
+
+        function eliminarContacto(indice) {
+
+            contactos.splice(indice, 1);
+
+            mostrarListado();
+
+        }
+
+
+        function eliminarSeleccionados() {
+
+            contactos = contactos.filter(function(contacto) {
+
+                return contacto.seleccionado === false;
+
+            });
+
+            mostrarListado();
+
+        }
+
+
+        function handlerFormulario(e) {
+
+            e.preventDefault();
+
+
+            const inputNombre =
+                e.target.querySelector('#input-nombre');
+
+            const inputApellido =
+                e.target.querySelector('#input-apellido');
+
+            const inputTelefono =
+                e.target.querySelector('#input-telefono');
+
+
+            const nombre = inputNombre.value;
+
+            const apellido = inputApellido.value;
+
+            const telefono = inputTelefono.value;
+
+
+            inputNombre.value = '';
+
+            inputApellido.value = '';
+
+            inputTelefono.value = '';
+
+
+            agregarContacto(
+                nombre,
+                apellido,
+                telefono
+            );
+
+        }
+
+
+        document
+            .querySelector('form')
+            .addEventListener('submit', handlerFormulario);
+
+
+        document
+            .getElementById('ordenar-por')
+            .addEventListener('change', mostrarListado);
+
+
+        document
+            .getElementById('buscador')
+            .addEventListener('input', mostrarListado);
+
+
+        document
+            .getElementById('btn-favoritos')
+            .addEventListener('click', function() {
+
+                mostrarSoloFavoritos = !mostrarSoloFavoritos;
+
+                const boton =
+                    document.getElementById('btn-favoritos');
+
+
+                if (mostrarSoloFavoritos) {
+
+                    boton.textContent = 'Ver todos los contactos';
+
+                } else {
+
+                    boton.textContent = 'Ver solo favoritos';
+
+                }
+
+
+                mostrarListado();
+
+            });
+
+
+        document
+            .getElementById('btn-eliminar-seleccionados')
+            .addEventListener('click', eliminarSeleccionados);
+
+
+        mostrarListado();
+
+    </script>
+
+</body>
+</html>
