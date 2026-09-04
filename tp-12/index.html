@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editor de Texto - DOM y JavaScript</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container my-1 my-sm-2 my-md-4 my-lg-5">
+        <h1>Editor de Texto</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <h2>Texto</h2>
+
+                <p class="texto" id="texto">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec elementum auctor libero, vel imperdiet est. Etiam blandit facilisis ex, nec cursus metus pharetra quis. Fusce imperdiet nisl nibh, ac aliquet ante elementum vitae.</p>
+
+                <hr class="hr">
+
+                <h2>Editar texto</h2>
+
+                <div class="mb-3">
+                    <label for="input-texto" class="form-label">Escribí el texto que querés mostrar:</label>
+                    <input type="text" id="input-texto" class="form-control" placeholder="Escribí un texto...">
+                </div>
+
+                <hr class="hr">
+
+                <h2>Opciones de Formato</h2>
+
+                <div class="row">
+                    <div class="col-12 col-md-4 my-1">
+                        <button id="btn-negrita" class="btn d-block w-100 btn-primary" data-formato="negrita">
+                            Bold (Negrita): OFF
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button id="btn-cursiva" class="btn d-block w-100 btn-primary" data-formato="cursiva">
+                            Italic (Cursiva): OFF
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button id="btn-subrayado" class="btn d-block w-100 btn-primary" data-formato="subrayado">
+                            Underline (Subrayado): OFF
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button id="btn-color" class="btn d-block w-100 btn-primary" data-formato="color">
+                            Color Rojo: OFF
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="hr">
+
+                <h2>Tamaño del texto</h2>
+
+                <div class="mb-3">
+                    <label for="input-tamano" class="form-label">Tamaño del texto:</label>
+                    <input type="range" id="input-tamano" class="form-range" min="12" max="40" value="16">
+                    <p>Tamaño actual: <span id="valor-tamano">16</span>px</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        const texto = document.getElementById('texto');
+
+        const btnNegrita = document.getElementById('btn-negrita');
+        const btnCursiva = document.getElementById('btn-cursiva');
+        const btnSubrayado = document.getElementById('btn-subrayado');
+        const btnColor = document.getElementById('btn-color');
+
+        const inputTexto = document.getElementById('input-texto');
+        const inputTamano = document.getElementById('input-tamano');
+        const valorTamano = document.getElementById('valor-tamano');
+
+        let negritaActiva = false;
+        let cursivaActiva = false;
+        let subrayadoActivo = false;
+        let colorActivo = false;
+
+        function actualizarBoton(boton, activo, textoActivo, textoInactivo) {
+            if (activo) {
+                boton.classList.remove('btn-primary');
+                boton.classList.add('btn-success');
+                boton.textContent = textoActivo;
+            } else {
+                boton.classList.remove('btn-success');
+                boton.classList.add('btn-primary');
+                boton.textContent = textoInactivo;
+            }
+        }
+
+        function funcionNegrita() {
+            negritaActiva = !negritaActiva;
+
+            if (negritaActiva) {
+                texto.style.fontWeight = 'bold';
+            } else {
+                texto.style.fontWeight = 'normal';
+            }
+
+            actualizarBoton(
+                btnNegrita,
+                negritaActiva,
+                'Bold (Negrita): ON',
+                'Bold (Negrita): OFF'
+            );
+        }
+
+        function funcionCursiva() {
+            cursivaActiva = !cursivaActiva;
+
+            if (cursivaActiva) {
+                texto.style.fontStyle = 'italic';
+            } else {
+                texto.style.fontStyle = 'normal';
+            }
+
+            actualizarBoton(
+                btnCursiva,
+                cursivaActiva,
+                'Italic (Cursiva): ON',
+                'Italic (Cursiva): OFF'
+            );
+        }
+
+        function funcionSubrayado() {
+            subrayadoActivo = !subrayadoActivo;
+
+            if (subrayadoActivo) {
+                texto.style.textDecoration = 'underline';
+            } else {
+                texto.style.textDecoration = 'none';
+            }
+
+            actualizarBoton(
+                btnSubrayado,
+                subrayadoActivo,
+                'Underline (Subrayado): ON',
+                'Underline (Subrayado): OFF'
+            );
+        }
+
+        function funcionColor() {
+            colorActivo = !colorActivo;
+
+            if (colorActivo) {
+                texto.style.color = 'red';
+            } else {
+                texto.style.color = 'black';
+            }
+
+            actualizarBoton(
+                btnColor,
+                colorActivo,
+                'Color Rojo: ON',
+                'Color Rojo: OFF'
+            );
+        }
+
+        function handlerBoton(e) {
+            const funcionBoton = e.target.dataset.formato;
+
+            switch (funcionBoton) {
+                case 'negrita':
+                    funcionNegrita();
+                    break;
+
+                case 'cursiva':
+                    funcionCursiva();
+                    break;
+
+                case 'subrayado':
+                    funcionSubrayado();
+                    break;
+
+                case 'color':
+                    funcionColor();
+                    break;
+            }
+        }
+
+        inputTexto.addEventListener('input', function () {
+            texto.textContent = inputTexto.value;
+        });
+
+        inputTamano.addEventListener('input', function () {
+            texto.style.fontSize = inputTamano.value + 'px';
+            valorTamano.textContent = inputTamano.value;
+        });
+
+        document.querySelectorAll('button.btn').forEach(e => e.addEventListener('click', handlerBoton));
+    </script>
+</body>
+</html>
